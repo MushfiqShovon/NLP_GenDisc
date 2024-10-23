@@ -58,9 +58,9 @@ def load_and_preprocess(file_path):
     df.to_csv(cleaned_file_path, index=False, header=False)
     return cleaned_file_path
 
-cleaned_train_file = load_and_preprocess('./data/train.data')
-cleaned_valid_file = load_and_preprocess('./data/valid.data')
-cleaned_test_file = load_and_preprocess('./data/test.data')
+cleaned_train_file = load_and_preprocess('./data/ag_news/data/train.data')
+cleaned_valid_file = load_and_preprocess('./data/ag_news/data/valid.data')
+cleaned_test_file = load_and_preprocess('./data/ag_news/data/test.data')
 
 
 spacy_en = spacy.load('en_core_web_sm')

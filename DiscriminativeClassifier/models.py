@@ -28,3 +28,20 @@ class LSTMNet(nn.Module):
         dense_outputs=self.fc(hidden)
 
         return dense_outputs
+
+
+class QLSTM(nn.Module):
+    def __init__(self,vocab_size,embedding_dim,hidden_dim,output_dim,n_layers,bidirectional,dropout, bit_witdh):
+        
+        super(QLSTM,self).__init__()
+
+class QLSTM_1bit(nn.Module):
+    def __init__(self,vocab_size,embedding_dim,hidden_dim,output_dim,n_layers,bidirectional,dropout, bit_witdh):
+        
+        super(QLSTM_1bit,self).__init__()
+
+class QLSTM_2bit(nn.Module):
+    def __init__(self,vocab_size,embedding_dim,hidden_dim,output_dim,n_layers,bidirectional,dropout, bit_witdh):
+        
+        super(QLSTM_2bit,self).__init__()
+
