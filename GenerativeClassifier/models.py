@@ -8,14 +8,6 @@ class Gen(nn.Module):
 
         
         super(Gen, self).__init__()
-
-        print("dropout: ", dropout)
-        print("use_cuda: ", use_cuda)
-        print("tied: ", tied)
-        print("use_bias: ", use_bias)
-        print("concat_label: ", concat_label)
-        print("avg_loss: ", avg_loss)
-        print("one_hot: ", one_hot)
         
         self.drop = nn.Dropout(dropout)
         
@@ -57,17 +49,9 @@ class Gen(nn.Module):
 
         embedded_label = self.label_encoder(y_ext.data)
 
-        print("Shape of embedded_sents:", embedded_sents.shape) 
-        #print("Shape of hidden:", hidden.shape)  
-
         output, (_, _) = self.rnn(embedded_sents, hidden)
 
-        print("Shape of output (from LSTM):", output.shape)  # Should be [batch_size, seq_len, nhid]
-        print("Shape of embedded_label (before unsqueeze and repeat):", embedded_label.shape)  # Should be [batch_size, label_emb_dim]
-
         hidden_data = torch.cat((output.data, embedded_label), 1)
-
-        print("Shape of concatenated hidden_data:", hidden_data.shape)
 
         hidden_data = self.drop(hidden_data)
 
