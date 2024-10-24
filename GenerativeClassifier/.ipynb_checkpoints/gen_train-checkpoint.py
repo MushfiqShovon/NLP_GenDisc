@@ -81,8 +81,16 @@ def evaluate(validdata, validlabel, model, criterion, args):
 
                 # output (batch_size, )
                 hidden = model.init_hidden(len(sents))
-                loss = model(x, x_pred, y_ext, hidden, criterion, True)
-                losses.append(loss)
+                
+                out = model(x, x_pred, y_ext, hidden, criterion, True)
+                
+                loss_matrix = criterion(out, x_pred.data)
+
+                LM_loss = nn.utils.rnn.pad_packed_sequence(nn.utils.rnn.PackedSequence(
+                    loss_matrix, x.batch_sizes))[0].transpose(0,1)
+                sum_loss = torch.sum(LM_loss, dim = 1)
+                
+                losses.append(sum_loss)
 
             losses = torch.cat(losses, dim=0).view(-1, len(sents))
             prediction = torch.argmin(losses, dim=0)
@@ -112,6 +120,7 @@ def train_epoch(traindata, trainlabel, validdata, validlabel, model, criterion, 
         sents, y_ext, labels = sents_label
 
         batch_ind += 1
+        
         optimizer.zero_grad()
         hidden = model.init_hidden(len(sents))
 
@@ -119,12 +128,15 @@ def train_epoch(traindata, trainlabel, validdata, validlabel, model, criterion, 
         x_pred = nn.utils.rnn.pack_sequence([s[1:] for s in sents])
         y_ext = nn.utils.rnn.pack_sequence(y_ext)
 
-        # p_y = torch.FloatTensor([0.071] * len(seq_len))
 
         if args.device.type == 'cuda':
             x, y_ext, x_pred = x.cuda(), y_ext.cuda(), x_pred.cuda() 
 
-        loss = model(x, x_pred, y_ext, hidden, criterion)
+        out = model(x, x_pred, y_ext, hidden, criterion)
+        
+        loss_matrix = criterion(out, x_pred.data)
+
+        loss = torch.sum(loss_matrix)
 
         loss.backward()
         # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
@@ -135,7 +147,7 @@ def train_epoch(traindata, trainlabel, validdata, validlabel, model, criterion, 
         # acc = 100.0 * num_correct / labels.size(0)
 
         total_loss += loss.item()
-
+        
         if batch_ind % args.log_interval == 0:
             elapsed = time.time() - start_time
             _, train_acc = evaluate(sents, labels, model, criterion, args)

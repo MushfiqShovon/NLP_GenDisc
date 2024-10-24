@@ -1,11 +1,6 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-
 class Gen(nn.Module):
     def __init__(self, ntoken, ninp, nlabelembed, nhid, nlayers, nclass, dropout, use_cuda, 
         tied, use_bias, concat_label, avg_loss, one_hot):
-
         
         super(Gen, self).__init__()
         
@@ -44,7 +39,6 @@ class Gen(nn.Module):
 
     def forward(self, x, x_pred, y_ext, hidden, criterion, is_infer = False):
         
-        
         embedded_sents = self.encoder(x.data)
 
         embedded_label = self.label_encoder(y_ext.data)
@@ -55,24 +49,12 @@ class Gen(nn.Module):
 
         hidden_data = self.drop(hidden_data)
 
-        # out: seq_len * n_token.
         out = self.decoder(hidden_data)
+        
+        return out
 
-        loss = criterion(out, x_pred.data)
-
-        if is_infer:
-            LM_loss = nn.utils.rnn.pad_packed_sequence(nn.utils.rnn.PackedSequence(
-                loss, x.batch_sizes))[0].transpose(0,1)
-            total_loss = torch.sum(LM_loss, dim = 1)
-            return total_loss
-        else:
-            if self.avg_loss:
-                return torch.mean(loss)
-            else:
-                return torch.sum(loss)
 
     def init_hidden(self, bsz):
         weight = next(self.parameters())
-        # Return hidden state and cell state as 3D tensors
         return (weight.new_zeros(self.nlayers, self.nhid),
                 weight.new_zeros(self.nlayers, self.nhid))
